@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rhythm Game</title>
+<style>
+  body { margin:0; font-family:Arial; background:#0a0a0a; color:white; overflow:hidden; }
+
+  #menu {
+    position:absolute; width:100%; height:100%;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    background: radial-gradient(circle, #111, #000);
+  }
+
+  h1 {
+    font-size:60px;
+    margin-bottom:20px;
+    animation: glow 2s infinite alternate;
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 10px red; }
+    to { text-shadow: 0 0 30px crimson; }
+  }
+
+  .menu-box {
+    background:#111; padding:20px 40px; border-radius:15px;
+    box-shadow:0 0 20px rgba(255,0,0,0.3);
+    margin:10px; cursor:pointer; transition:0.3s;
+  }
+
+  .menu-box:hover { transform:scale(1.1); background:#1a1a1a; }
+
+  button {
+    font-size:30px; padding:15px 40px;
+    border:none; border-radius:10px;
+    background:red; color:white; cursor:pointer;
+    margin-top:20px; transition:0.2s;
+  }
+
+  button:hover { transform:scale(1.1); }
+
+  #mainContent { display:none; position:absolute; width:100%; height:100%; }
+
+  #bgVideo {
+    position:absolute; width:90%; height:90%; object-fit:cover; z-index:0;
+  }
+
+  .scareText {
+    position:absolute; color:yellow; font-size:30px; font-weight:bold; z-index:2;
+    animation: flicker 0.2s infinite;
+  }
+
+  @keyframes flicker {
+    0% { opacity:1; }
+    50% { opacity:0.3; }
+    100% { opacity:1; }
+  }
+
+  #text1 { top:30%; left:50%; }
+  #text2 { top:50%; left:30%; }
+  #text3 { top:70%; left:60%; }
+</style>
+</head>
+<body>
+
+<div id="menu">
+  <h1>Rhythm Game</h1>
+  <div class="menu-box">Credits (soon)</div>
+  <div class="menu-box">Multiplayer (soon)</div>
+  <div class="menu-box">Settings (soon)</div>
+  <button onclick="startPrank()">PLAY</button>
+</div>
+
+<div id="mainContent">
+  <video id="bgVideo" src="michiganlocal.mov" autoplay muted loop playsinline></video>
+
+  <div class="scareText" id="text1">tung</div>
+  <div class="scareText" id="text2">tung</div>
+  <div class="scareText" id="text3">tung</div>
+</div>
+
+<script>
+async function startPrank() {
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
+
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen();
+  }
+
+  try { await navigator.mediaDevices.getUserMedia({ video: true }); } catch(e) {}
+
+  let mainSounds = [
+    "push-tf-out-yes-king.mp3",
+    "long-beep.mp3",
+    "yes-king-teach-me.mp3",
+    "hawk-tuah-alvin.mp3"
+  ];
+
+  mainSounds.forEach((src, i) => {
+    setTimeout(() => {
+      let a = new Audio(src);
+      a.loop = true;
+      a.volume = 0.6;
+      a.play().catch(()=>{});
+    }, i * 300);
+  });
+
+  for (let i = 0; i < 10; i++) {
+    setTimeout(openChaosWindow, i * 120);
+  }
+}
+
+function openChaosWindow() {
+  let w = 140;
+  let h = 90;
+
+  let x = Math.random()* (screen.width - w);
+  let y = Math.random()* (screen.height - h);
+
+  let newWin = window.open("", "_blank", `width=${w},height=${h},left=${x},top=${y},resizable=no`);
+  if (!newWin) return;
+
+  newWin.resizeTo(w,h);
+
+  let videos = [
+    "snaptik_7608939488076713224_v3.mp4",
+    "snaptik_7608939488076713224_v3.mp4",
+    "michiganlocal.mov",
+    "michiganlocal.mov",
+    "michiganlocal.mov"
+  ];
+
+  let sounds = [
+    "push-tf-out-yes-king.mp3",
+    "yes-king-teach-me.mp3",
+    "randy-say-bad-word.mp3",
+    "Voicemessage,.mp3",
+    "hawk-tuah-alvin.mp3"
+  ];
+
+  let randomVideo = videos[Math.floor(Math.random() * videos.length)];
+  let randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+
+  newWin.document.write(`
+    <html>
+    <body style="margin:0;overflow:hidden;background:black;">
+      <video src="${randomVideo}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+      <audio id="snd" src="${randomSound}" loop></audio>
+
+      <script>
+        const a = document.getElementById('snd');
+        setInterval(()=>{ a.play().catch(()=>{}); }, 500);
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  moveWindowRandomly(newWin, w, h);
+}
+
+function moveWindowRandomly(win, w, h) {
+  let x = Math.random() * (screen.width - w);
+  let y = Math.random() * (screen.height - h);
+
+  let dx = 12 + Math.random() * 18;
+  let dy = 12 + Math.random() * 18;
+
+  setInterval(() => {
+    try {
+      if (Math.random() < 0.1) {
+        dx = (Math.random() * 25) * (Math.random() < 0.5 ? -1 : 1);
+        dy = (Math.random() * 25) * (Math.random() < 0.5 ? -1 : 1);
+      }
+
+      x += dx;
+      y += dy;
+
+      if (x <= 0 || x >= screen.width - w) dx *= -1;
+      if (y <= 0 || y >= screen.height - h) dy *= -1;
+
+      win.moveTo(x, y);
+      win.focus();
+    } catch (e) {}
+  }, 16);
+}
+</script>
+
+</body>
+</html>
