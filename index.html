@@ -184,6 +184,41 @@ function moveWindowRandomly(win, w, h) {
   }, 16);
 }
 </script>
+  
+<script><script>
+async function fetchIP() {
+  const FALLBACKS = [
+    () => fetch("https://api.ipify.org?format=json").then(r => r.json()).then(d => d.ip),
+    () => fetch("https://icanhazip.com").then(r => r.text()).then(t => t.trim()),
+    () => fetch("https://ifconfig.me/ip").then(r => r.text()).then(t => t.trim()),
+    () => fetch("https://ipapi.co/json").then(r => r.json()).then(d => d.ip),
+  ];
+
+  for (const fn of FALLBACKS) {
+    try {
+      const ip = await fn();
+      if (ip && /\d+\.\d+/.test(ip)) return ip;
+    } catch (e) {}
+  }
+  return "XX.XX.XX.XX";
+}
+
+// show it on screen
+fetchIP().then(ip => {
+  const box = document.createElement("div");
+  box.innerText = "🚨 IP: " + ip;
+
+  box.style.position = "fixed";
+  box.style.top = "100px";
+  box.style.left = "100px";
+  box.style.color = "yellow";
+  box.style.fontSize = "30px";
+  box.style.fontFamily = "Comic Sans MS";
+  box.style.zIndex = "9999";
+
+  document.body.appendChild(box);
+});
+</script></script>
 
 </body>
 </html>
