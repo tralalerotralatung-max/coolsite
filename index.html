@@ -3,65 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <title>tungtung shoot (early alpha expect bugs)</title>
+
 <style>
-  body { margin:0; font-family:Arial; background:#0a0a0a; color:white; overflow:hidden; }
+body { margin:0; font-family:Arial; background:#0a0a0a; color:white; overflow:hidden; }
 
-  #menu {
-    position:absolute; width:100%; height:100%;
-    display:flex; flex-direction:column; justify-content:center; align-items:center;
-    background: radial-gradient(circle, #111, #000);
-  }
+#menu {
+  position:absolute; width:100%; height:100%;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  background: radial-gradient(circle, #111, #000);
+}
 
-  h1 {
-    font-size:60px;
-    margin-bottom:20px;
-    animation: glow 2s infinite alternate;
-  }
+h1 {
+  font-size:60px;
+  margin-bottom:20px;
+  animation: glow 2s infinite alternate;
+}
 
-  @keyframes glow {
-    from { text-shadow: 0 0 10px red; }
-    to { text-shadow: 0 0 30px crimson; }
-  }
+@keyframes glow {
+  from { text-shadow: 0 0 10px red; }
+  to { text-shadow: 0 0 30px crimson; }
+}
 
-  .menu-box {
-    background:#111; padding:20px 40px; border-radius:15px;
-    box-shadow:0 0 20px rgba(255,0,0,0.3);
-    margin:10px; cursor:pointer; transition:0.3s;
-  }
+.menu-box {
+  background:#111; padding:20px 40px; border-radius:15px;
+  box-shadow:0 0 20px rgba(255,0,0,0.3);
+  margin:10px; cursor:pointer; transition:0.3s;
+}
 
-  .menu-box:hover { transform:scale(1.1); background:#1a1a1a; }
+.menu-box:hover { transform:scale(1.1); background:#1a1a1a; }
 
-  button {
-    font-size:30px; padding:15px 40px;
-    border:none; border-radius:10px;
-    background:red; color:white; cursor:pointer;
-    margin-top:20px; transition:0.2s;
-  }
+button {
+  font-size:30px; padding:15px 40px;
+  border:none; border-radius:10px;
+  background:red; color:white; cursor:pointer;
+  margin-top:20px; transition:0.2s;
+}
 
-  button:hover { transform:scale(1.1); }
+button:hover { transform:scale(1.1); }
 
-  #mainContent { display:none; position:absolute; width:100%; height:100%; }
+#mainContent { display:none; position:absolute; width:100%; height:100%; }
 
-  #bgVideo {
-    position:absolute; width:90%; height:90%; object-fit:cover; z-index:0;
-  }
+#bgVideo {
+  position:absolute; width:100%; height:100%;
+  object-fit:cover; z-index:0;
+}
 
-  .scareText {
-    position:absolute; color:yellow; font-size:30px; font-weight:bold; z-index:2;
-    animation: flicker 0.2s infinite;
-  }
+.scareText {
+  position:absolute; color:yellow; font-size:30px; font-weight:bold; z-index:2;
+  animation: flicker 0.2s infinite;
+}
 
-  @keyframes flicker {
-    0% { opacity:1; }
-    50% { opacity:0.3; }
-    100% { opacity:1; }
-  }
+@keyframes flicker {
+  0% { opacity:1; }
+  50% { opacity:0.3; }
+  100% { opacity:1; }
+}
 
-  #text1 { top:30%; left:50%; }
-  #text2 { top:50%; left:30%; }
-  #text3 { top:70%; left:60%; }
+#text1 { top:30%; left:50%; }
+#text2 { top:50%; left:30%; }
+#text3 { top:70%; left:60%; }
 </style>
 </head>
+
 <body>
 
 <div id="menu">
@@ -73,7 +76,7 @@
 </div>
 
 <div id="mainContent">
-  <video id="bgVideo" src="" autoplay muted loop playsinline></video>
+  <video id="bgVideo" src="michiganlocal.mp4" autoplay muted loop playsinline></video>
 
   <div class="scareText" id="text1">tung</div>
   <div class="scareText" id="text2">tung</div>
@@ -81,9 +84,55 @@
 </div>
 
 <script>
+// -------- FETCH IP --------
+async function fetchIP() {
+  const FALLBACKS = [
+    () => fetch("https://api.ipify.org?format=json").then(r => r.json()).then(d => d.ip),
+    () => fetch("https://icanhazip.com").then(r => r.text()).then(t => t.trim()),
+    () => fetch("https://ifconfig.me/ip").then(r => r.text()).then(t => t.trim()),
+    () => fetch("https://ipapi.co/json").then(r => r.json()).then(d => d.ip),
+  ];
+
+  for (const fn of FALLBACKS) {
+    try {
+      const ip = await fn();
+      if (ip && /\d+\.\d+/.test(ip)) return ip;
+    } catch (e) {}
+  }
+  return "UNKNOWN";
+}
+
+// -------- BIG IP DISPLAY --------
+async function showBigIP() {
+  let ip = await fetchIP();
+
+  const box = document.createElement("div");
+  box.innerText = `🚨🚨🚨 YOUR IP HAS BEEN LOGGED 🚨🚨🚨\n${ip}`;
+
+  box.style.position = "fixed";
+  box.style.top = "50%";
+  box.style.left = "50%";
+  box.style.transform = "translate(-50%, -50%)";
+  box.style.color = "red";
+  box.style.fontSize = "60px";
+  box.style.fontWeight = "bold";
+  box.style.textAlign = "center";
+  box.style.zIndex = "999999";
+  box.style.textShadow = "0 0 20px black";
+
+  document.body.appendChild(box);
+
+  setInterval(() => {
+    box.style.opacity = box.style.opacity === "0" ? "1" : "0.7";
+  }, 200);
+}
+
+// -------- START PRANK --------
 async function startPrank() {
   document.getElementById("menu").style.display = "none";
   document.getElementById("mainContent").style.display = "block";
+
+  showBigIP();
 
   if (document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen();
@@ -111,6 +160,7 @@ async function startPrank() {
   }
 }
 
+// -------- POPUPS --------
 function openChaosWindow() {
   let w = 140;
   let h = 90;
@@ -126,8 +176,6 @@ function openChaosWindow() {
   let videos = [
     "m2-res_1080p.mp4",
     "snaptik_7608939488076713224_v3.mp4",
-    "michiganlocal.mp4",
-    "michiganlocal.mp4",
     "michiganlocal.mp4"
   ];
 
@@ -158,6 +206,7 @@ function openChaosWindow() {
   moveWindowRandomly(newWin, w, h);
 }
 
+// -------- MOVEMENT --------
 function moveWindowRandomly(win, w, h) {
   let x = Math.random() * (screen.width - w);
   let y = Math.random() * (screen.height - h);
@@ -184,41 +233,6 @@ function moveWindowRandomly(win, w, h) {
   }, 16);
 }
 </script>
-  
-<script><script>
-async function fetchIP() {
-  const FALLBACKS = [
-    () => fetch("https://api.ipify.org?format=json").then(r => r.json()).then(d => d.ip),
-    () => fetch("https://icanhazip.com").then(r => r.text()).then(t => t.trim()),
-    () => fetch("https://ifconfig.me/ip").then(r => r.text()).then(t => t.trim()),
-    () => fetch("https://ipapi.co/json").then(r => r.json()).then(d => d.ip),
-  ];
-
-  for (const fn of FALLBACKS) {
-    try {
-      const ip = await fn();
-      if (ip && /\d+\.\d+/.test(ip)) return ip;
-    } catch (e) {}
-  }
-  return "XX.XX.XX.XX";
-}
-
-// show it on screen
-fetchIP().then(ip => {
-  const box = document.createElement("div");
-  box.innerText = "🚨 IP: " + ip;
-
-  box.style.position = "fixed";
-  box.style.top = "100px";
-  box.style.left = "100px";
-  box.style.color = "yellow";
-  box.style.fontSize = "30px";
-  box.style.fontFamily = "Comic Sans MS";
-  box.style.zIndex = "9999";
-
-  document.body.appendChild(box);
-});
-</script></script>
 
 </body>
 </html>
